@@ -2,7 +2,8 @@
 # -*- coding: utf-8 -*-
 
 class Menu:
-    def __init__(self):
+    def __init__(self, screen):
+        self.screen = screen
         self.state = None
 
     def draw(self, ):
