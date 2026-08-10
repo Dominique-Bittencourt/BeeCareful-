@@ -1,0 +1,60 @@
+#!/usr/bin/python
+
+# -*- coding: utf-8 -*-
+
+import math
+import pygame
+
+
+class Pollen:
+    def __init__(self, screen, x, y):
+        self.screen = screen
+
+        # Pollen position
+        self.x = x
+        self.y = y
+
+        # Pollen movement
+        self.speed = 20
+        self.float_offset = 0
+        self.time = 0
+
+        # Pollen image
+        self.image = pygame.image.load(
+            './asset/pollen.png'
+        ).convert_alpha()
+
+        self.rect = self.image.get_rect(
+            center=(self.x, self.y)
+        )
+
+        self.collected = False
+
+    def update(self, dt):
+        self.time += dt
+
+        # Move upward
+        self.y -= self.speed * dt
+
+        # Horizontal floating movement
+        self.float_offset = math.sin(
+            self.time * 4
+        ) * 8
+
+        self.rect.center = (
+            self.x + self.float_offset,
+            self.y
+        )
+
+    def draw(self):
+        if not self.collected:
+            self.screen.blit(
+                self.image,
+                self.rect
+            )
+
+    def collect(self):
+        self.collected = True
+
+    def is_collected(self):
+        return self.collected

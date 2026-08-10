@@ -1,12 +1,15 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
+
 import pygame
 import math
+
+from code.GameState import GameState
 
 class Menu:
     def __init__(self, screen):
         self.screen = screen
-        self.state = None
+        self.state = GameState.MENU
 
         # Background
         self.surf = pygame.image.load('./asset/sky.png')
@@ -301,8 +304,13 @@ class Menu:
             self.text_color
         )
 
-    def startGame(self, ):
-        pass
+    def startGame(self, event):
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            if self.button_rect.collidepoint(event.pos):
+                self.state = GameState.PLAYING
+                return True
+
+        return False
 
     def exitGame(self, ):
         pass
