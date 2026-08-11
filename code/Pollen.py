@@ -7,16 +7,18 @@ import pygame
 
 
 class Pollen:
-    def __init__(self, screen, x, y):
+    def __init__(self, screen, x, y, flower):
         self.screen = screen
+
+        #Pollen origin
+        self.flower = flower
 
         # Pollen position
         self.x = x
         self.y = y
 
         # Pollen movement
-        self.speed = 20
-        self.float_offset = 0
+        self.speed = 15
         self.time = 0
 
         # Pollen image
@@ -37,12 +39,10 @@ class Pollen:
         self.y -= self.speed * dt
 
         # Horizontal floating movement
-        self.float_offset = math.sin(
-            self.time * 4
-        ) * 8
+        offset_x = math.sin(self.time * 4) * 8
 
         self.rect.center = (
-            self.x + self.float_offset,
+            self.x + offset_x,
             self.y
         )
 

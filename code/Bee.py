@@ -4,6 +4,7 @@
 import pygame
 
 from code.Const import SCREEN_WIDTH, SCREEN_HEIGHT
+from code.Const import BEE_MIN_Y, GROUND_Y
 
 class Bee:
     def __init__(self, screen):
@@ -40,7 +41,7 @@ class Bee:
         if keys[pygame.K_s] or keys[pygame.K_DOWN]:
             self.y += self.speed
 
-        # Keep the bee inside the playable area
+        # Keep the bee inside the horizontal playable area
         self.x = max(
             self.rect.width // 2,
             min(
@@ -49,17 +50,22 @@ class Bee:
             )
         )
 
+        # Keep the bee inside the vertical playable area
         self.y = max(
-            self.rect.height // 2,
+            BEE_MIN_Y + self.rect.height // 2,
             min(
                 self.y,
-                320 - self.rect.height // 2
+                GROUND_Y - self.rect.height // 2
             )
         )
 
-    def draw(self):
-        self.rect.center = (self.x, self.y)
+        # Update the collision rectangle
+        self.rect.center = (
+            self.x,
+            self.y
+        )
 
+    def draw(self):
         self.screen.blit(
             self.image,
             self.rect

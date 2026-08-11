@@ -15,6 +15,9 @@ from code.Background import Background
 from code.Flower import Flower
 from code.Bee import Bee
 from code.Pollen import Pollen
+from code.PollenFactory import PollenFactory
+from code.Cloud import Cloud
+from code.RaindropFactory import RaindropFactory
 
 class Game:
     def __init__(self):
@@ -36,6 +39,47 @@ class Game:
 
         self.menu = Menu(self.screen)
         self.background = Background(self.screen)
+
+        self.clouds = [
+            Cloud(
+                self.screen,
+                './asset/cloud1.png',
+                50,
+                75,
+                18
+            ),
+            Cloud(
+                self.screen,
+                './asset/cloud2.png',
+                210,
+                105,
+                19
+            ),
+            Cloud(
+                self.screen,
+                './asset/cloud1.png',
+                380,
+                70,
+                18
+            ),
+            Cloud(
+                self.screen,
+                './asset/cloud2.png',
+                550,
+                115,
+                19
+            )
+        ]
+
+        self.raindrops = []
+
+        self.rain_cooldowns = [
+            1.6,
+            2.5,
+            2.0,
+            3.0
+        ]
+
         self.flowers = [
             Flower(
                 self.screen,
@@ -70,20 +114,25 @@ class Game:
         ]
         self.bee = Bee(self.screen)
 
-        self.pollens = [
-            Pollen(self.screen, 100, 250),
-            Pollen(self.screen, 200, 180),
-            Pollen(self.screen, 350, 230),
-            Pollen(self.screen, 480, 170),
-        ]
+        self.pollens = []
+        self.pollen_cooldowns = {}
+
+        for flower in self.flowers:
+            self.pollens.append(
+                PollenFactory.create_from_flower(
+                    self.screen,
+                    flower
+                )
+            )
+
+            self.pollen_cooldowns[flower] = 0
 
     def start(self):
         while self.running:
-
-            self.clock.tick(60)
+            dt = self.clock.tick(60) / 1000
 
             self.events()
-            self.update()
+            self.update(dt)
             self.draw()
 
         pygame.quit()
@@ -92,14 +141,78 @@ class Game:
         pygame.mixer.music.load(GAME_MUSIC)
         pygame.mixer.music.play(-1)
 
-    def update(self):
+    def update(self, dt):
         if self.menu.state == GameState.PLAYING:
+
             self.bee.move()
 
+            # Update clouds
+            for cloud in self.clouds:
+                cloud.update(dt)
+
+            # Generate rain
+            for i, cloud in enumerate(self.clouds):
+
+                self.rain_cooldowns[i] -= dt
+
+                if self.rain_cooldowns[i] <= 0:
+                    self.raindrops.append(
+                        RaindropFactory.create_from_cloud(
+                            self.screen,
+                            cloud
+                        )
+                    )
+
+                    self.rain_cooldowns[i] = 2.5
+
+            # Update raindrops
+            for raindrop in self.raindrops:
+                if raindrop.active:
+                    raindrop.update(dt)
+
+            # Remove inactive raindrops
+            self.raindrops = [
+                raindrop
+                for raindrop in self.raindrops
+                if raindrop.active
+            ]
+
+            # Update pollen
             for pollen in self.pollens:
                 if not pollen.is_collected():
+                    pollen.update(dt)
+
                     if self.bee.collide(pollen):
                         pollen.collect()
+                        self.pollen_cooldowns[pollen.flower] = 2.0
+
+                    elif pollen.rect.bottom < 0:
+                        pollen.collect()
+                        self.pollen_cooldowns[pollen.flower] = 2.0
+
+            # Remove collected or expired pollen
+            self.pollens = [
+                pollen
+                for pollen in self.pollens
+                if not pollen.is_collected()
+            ]
+
+            # Regenerate pollen
+            for flower in self.flowers:
+
+                if not any(
+                        pollen.flower == flower
+                        for pollen in self.pollens
+                ):
+                    self.pollen_cooldowns[flower] -= dt
+
+                    if self.pollen_cooldowns[flower] <= 0:
+                        self.pollens.append(
+                            PollenFactory.create_from_flower(
+                                self.screen,
+                                flower
+                            )
+                        )
 
     def draw(self):
         if self.menu.state == GameState.MENU:
@@ -107,6 +220,12 @@ class Game:
 
         elif self.menu.state == GameState.PLAYING:
             self.background.draw()
+
+            for cloud in self.clouds:
+                cloud.draw()
+
+            for raindrop in self.raindrops:
+                raindrop.draw()
 
             for flower in self.flowers:
                 flower.draw()

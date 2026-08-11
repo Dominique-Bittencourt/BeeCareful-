@@ -18,6 +18,18 @@ class Background:
             top=0
         )
 
+        # Background clouds
+        self.clouds = pygame.image.load(
+            './asset/backgroundcloud.png'
+        ).convert_alpha()
+
+        self.clouds.set_alpha(150)
+
+        self.clouds_rect = self.clouds.get_rect(
+            left=0,
+            top=0
+        )
+
         # Mountains
         self.mountains = pygame.image.load(
             './asset/mountain.png'
@@ -57,6 +69,12 @@ class Background:
             self.sky_rect
         )
 
+        # Draw background clouds
+        self.screen.blit(
+            self.clouds,
+            self.clouds_rect
+        )
+        
         # Draw mountains
         self.screen.blit(
             self.mountains,
