@@ -311,7 +311,7 @@ class Game:
         )
 
         title_rect = title.get_rect(
-            center=(300, 155)
+            center=(300, 105)
         )
 
         self.screen.blit(
@@ -335,7 +335,7 @@ class Game:
         )
 
         message_rect = message.get_rect(
-            center=(300, 215)
+            center=(300, 165)
         )
 
         self.screen.blit(
@@ -350,7 +350,7 @@ class Game:
         )
 
         message2_rect = message2.get_rect(
-            center=(300, 240)
+            center=(300, 190)
         )
 
         self.screen.blit(
@@ -366,7 +366,7 @@ class Game:
         )
 
         restart_rect = restart.get_rect(
-            center=(300, 285)
+            center=(300, 230)
         )
 
         self.screen.blit(
@@ -382,7 +382,7 @@ class Game:
         )
 
         menu_rect = menu.get_rect(
-            center=(300, 320)
+            center=(300, 260)
         )
 
         self.screen.blit(
