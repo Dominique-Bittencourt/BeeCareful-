@@ -17,6 +17,8 @@ class Flower:
             center=(x, y)
         )
 
+        self.world_x = self.rect.x
+
     def draw(self):
         self.screen.blit(
             self.image,
@@ -28,3 +30,6 @@ class Flower:
             self.rect.centerx,
             self.rect.top
         )
+
+    def update_position(self, offset_x):
+        self.rect.x = self.world_x + offset_x

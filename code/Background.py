@@ -62,6 +62,15 @@ class Background:
             bottom=400
         )
 
+        self.ground_y = self.ground_rect.top
+
+        # Parallax movement
+        self.mountain_x = 0
+        self.ground_x = 0
+
+        self.mountain_speed = 8
+        self.ground_speed = 25
+
     def draw(self):
         # Draw sky
         self.screen.blit(
@@ -74,15 +83,49 @@ class Background:
             self.clouds,
             self.clouds_rect
         )
-        
+
         # Draw mountains
+        mountain_x = (
+                             self.mountain_x
+                             % self.mountains.get_width()
+                     ) - self.mountains.get_width()
+
         self.screen.blit(
             self.mountains,
-            self.mountains_rect
+            (mountain_x, self.mountains_rect.y)
+        )
+
+        self.screen.blit(
+            self.mountains,
+            (
+                mountain_x + self.mountains.get_width(),
+                self.mountains_rect.y
+            )
         )
 
         # Draw ground
+        ground_x = (
+                           self.ground_x
+                           % self.ground.get_width()
+                   ) - self.ground.get_width()
+
         self.screen.blit(
             self.ground,
-            self.ground_rect
+            (ground_x, self.ground_rect.y)
         )
+
+        self.screen.blit(
+            self.ground,
+            (
+                ground_x + self.ground.get_width(),
+                self.ground_rect.y
+            )
+        )
+
+    def update(self, dt):
+        # Move mountains slowly
+        self.mountain_x -= self.mountain_speed * dt
+
+        # Move ground faster
+        self.ground_x -= self.ground_speed * dt
+

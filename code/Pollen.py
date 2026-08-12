@@ -41,8 +41,9 @@ class Pollen:
         # Horizontal floating movement
         offset_x = math.sin(self.time * 4) * 8
 
+        # Follow the flower
         self.rect.center = (
-            self.x + offset_x,
+            self.flower.rect.centerx + offset_x,
             self.y
         )
 

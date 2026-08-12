@@ -112,6 +112,7 @@ class Game:
                 310
             )
         ]
+
         self.bee = Bee(self.screen)
 
         self.pollens = []
@@ -145,6 +146,30 @@ class Game:
         if self.menu.state == GameState.PLAYING:
 
             self.bee.move()
+            self.background.update(dt)
+
+            # Update flowers with the ground
+            for flower in self.flowers:
+                flower.update_position(
+                    self.background.ground_x
+                )
+
+            # Loop flowers
+            for flower in self.flowers:
+
+                if flower.rect.right < 0:
+                    last_flower = max(
+                        self.flowers,
+                        key=lambda item: item.world_x
+                    )
+
+                    flower.world_x = (
+                            last_flower.world_x + 125
+                    )
+
+                    flower.update_position(
+                        self.background.ground_x
+                    )
 
             # Update clouds
             for cloud in self.clouds:
