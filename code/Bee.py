@@ -3,8 +3,12 @@
 
 import pygame
 
-from code.Const import SCREEN_WIDTH, SCREEN_HEIGHT
-from code.Const import BEE_MIN_Y, GROUND_Y
+from code.Const import (
+SCREEN_WIDTH,
+GROUND_Y,
+BEE_MIN_Y,
+MAX_LIVES
+)
 
 class Bee:
     def __init__(self, screen):
@@ -18,7 +22,7 @@ class Bee:
         self.speed = 3
 
         # Health
-        self.lives = 3
+        self.lives = MAX_LIVES
         self.invulnerability_time = 0
 
         #Bee image

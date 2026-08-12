@@ -40,6 +40,11 @@ class Game:
         self.menu = Menu(self.screen)
         self.background = Background(self.screen)
 
+        # Life HUD
+        self.heart = pygame.image.load(
+            './asset/heart.png'
+        ).convert_alpha()
+
         self.clouds = [
             Cloud(
                 self.screen,
@@ -246,6 +251,17 @@ class Game:
                             )
                         )
 
+    def draw_lives(self):
+        for i in range(self.bee.lives):
+            heart_rect = self.heart.get_rect(
+                topleft=(20 + i * 30, 15)
+            )
+
+            self.screen.blit(
+                self.heart,
+                heart_rect
+            )
+
     def draw(self):
         if self.menu.state == GameState.MENU:
             self.menu.draw()
@@ -266,6 +282,7 @@ class Game:
                 pollen.draw()
 
             self.bee.draw()
+            self.draw_lives()
 
         pygame.display.flip()
 
