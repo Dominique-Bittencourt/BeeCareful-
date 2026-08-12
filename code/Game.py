@@ -6,7 +6,8 @@ from code.Const import (
     SCREEN_WIDTH,
     SCREEN_HEIGHT,
     MENU_MUSIC,
-    GAME_MUSIC
+    GAME_MUSIC,
+    MAX_LIVES,
 )
 
 from code.Menu import Menu
@@ -133,6 +134,21 @@ class Game:
 
             self.pollen_cooldowns[flower] = 0
 
+        # Game over font
+        self.game_over_font = pygame.font.Font(
+            './asset/fonts/PixelifySans-VariableFont_wght.ttf',
+            42
+        )
+
+        self.game_over_text_font = pygame.font.Font(
+            './asset/fonts/VT323-Regular.ttf',
+            24
+        )
+
+        self.game_over_color = (255, 220, 90)
+        self.game_over_shadow = (92, 58, 35)
+        self.game_over_text_color = (255, 248, 220)
+
     def start(self):
         while self.running:
             dt = self.clock.tick(60) / 1000
@@ -251,6 +267,8 @@ class Game:
                             )
                         )
 
+            self.checkGameOver()
+
     def draw_lives(self):
         for i in range(self.bee.lives):
             heart_rect = self.heart.get_rect(
@@ -261,6 +279,116 @@ class Game:
                 self.heart,
                 heart_rect
             )
+
+    def draw_game_over(self):
+        # Background
+        self.background.draw()
+
+        # Dark overlay
+        overlay = pygame.Surface(
+            (SCREEN_WIDTH, SCREEN_HEIGHT),
+            pygame.SRCALPHA
+        )
+
+        overlay.fill((0, 0, 0, 100))
+
+        self.screen.blit(
+            overlay,
+            (0, 0)
+        )
+
+        # Title shadow
+        title_shadow = self.game_over_font.render(
+            "GAME OVER",
+            True,
+            self.game_over_shadow
+        )
+
+        title = self.game_over_font.render(
+            "GAME OVER",
+            True,
+            self.game_over_color
+        )
+
+        title_rect = title.get_rect(
+            center=(300, 155)
+        )
+
+        self.screen.blit(
+            title_shadow,
+            (
+                title_rect.x + 3,
+                title_rect.y + 3
+            )
+        )
+
+        self.screen.blit(
+            title,
+            title_rect
+        )
+
+        # Message
+        message = self.game_over_text_font.render(
+            "Que pena! A chuva foi demais...",
+            True,
+            self.game_over_text_color
+        )
+
+        message_rect = message.get_rect(
+            center=(300, 215)
+        )
+
+        self.screen.blit(
+            message,
+            message_rect
+        )
+
+        message2 = self.game_over_text_font.render(
+            "Tome cuidado da próxima vez!",
+            True,
+            self.game_over_text_color
+        )
+
+        message2_rect = message2.get_rect(
+            center=(300, 240)
+        )
+
+        self.screen.blit(
+            message2,
+            message2_rect
+        )
+
+        # Restart instruction
+        restart = self.game_over_text_font.render(
+            "ENTER - Jogar novamente",
+            True,
+            self.game_over_text_color
+        )
+
+        restart_rect = restart.get_rect(
+            center=(300, 285)
+        )
+
+        self.screen.blit(
+            restart,
+            restart_rect
+        )
+
+        # Menu instruction
+        menu = self.game_over_text_font.render(
+            "ESC - Voltar ao menu",
+            True,
+            self.game_over_text_color
+        )
+
+        menu_rect = menu.get_rect(
+            center=(300, 320)
+        )
+
+        self.screen.blit(
+            menu,
+            menu_rect
+        )
 
     def draw(self):
         if self.menu.state == GameState.MENU:
@@ -284,7 +412,11 @@ class Game:
             self.bee.draw()
             self.draw_lives()
 
+        elif self.menu.state == GameState.GAME_OVER:
+            self.draw_game_over()
+
         pygame.display.flip()
+
 
     def events(self):
         for event in pygame.event.get():
@@ -296,8 +428,52 @@ class Game:
                 if self.menu.startGame(event):
                     self.change_music()
 
+            elif self.menu.state == GameState.GAME_OVER:
+
+                if event.type == pygame.KEYDOWN:
+
+                    if event.key == pygame.K_RETURN:
+                        self.restart_game()
+
+                    elif event.key == pygame.K_ESCAPE:
+                        self.menu.state = GameState.MENU
+
     def checkVictory(self, ):
         pass
 
-    def checkGameOver(self, ):
-        pass
+    def checkGameOver(self):
+        if self.bee.lives <= 0:
+            self.menu.state = GameState.GAME_OVER
+
+    def restart_game(self):
+        self.bee.lives = MAX_LIVES
+        self.bee.x = 300
+        self.bee.y = 280
+        self.bee.rect.center = (
+            self.bee.x,
+            self.bee.y
+        )
+
+        self.bee.invulnerability_time = 0
+
+        self.raindrops.clear()
+
+        self.pollens.clear()
+        for flower in self.flowers:
+            self.pollens.append(
+                PollenFactory.create_from_flower(
+                    self.screen,
+                    flower
+                )
+            )
+
+            self.pollen_cooldowns[flower] = 0
+
+        self.background.ground_x = 0
+        self.background.mountain_x = 0
+
+        self.menu.state = GameState.PLAYING
+
+        pygame.mixer.music.load(GAME_MUSIC)
+        pygame.mixer.music.play(-1)
+
