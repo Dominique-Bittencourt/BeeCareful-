@@ -17,6 +17,10 @@ class Bee:
         #Bee movement speed
         self.speed = 3
 
+        # Health
+        self.lives = 3
+        self.invulnerability_time = 0
+
         #Bee image
         self.image = pygame.image.load(
             './asset/bee.png'
@@ -66,6 +70,13 @@ class Bee:
         )
 
     def draw(self):
+        # Blink while invulnerable
+        if self.invulnerability_time > 0:
+            blink = pygame.time.get_ticks() // 100
+
+            if blink % 2 == 0:
+                return
+
         self.screen.blit(
             self.image,
             self.rect
@@ -73,3 +84,16 @@ class Bee:
 
     def collide(self, other):
         return self.rect.colliderect(other.rect)
+
+    def update(self, dt):
+        if self.invulnerability_time > 0:
+            self.invulnerability_time -= dt
+
+    def take_damage(self):
+        if self.invulnerability_time > 0:
+            return False
+
+        self.lives -= 1
+        self.invulnerability_time = 1.0
+
+        return True

@@ -146,6 +146,7 @@ class Game:
         if self.menu.state == GameState.PLAYING:
 
             self.bee.move()
+            self.bee.update(dt)
             self.background.update(dt)
 
             # Update flowers with the ground
@@ -194,6 +195,12 @@ class Game:
             for raindrop in self.raindrops:
                 if raindrop.active:
                     raindrop.update(dt)
+
+                    if self.bee.collide(raindrop):
+                        raindrop.active= False
+                        self.bee.take_damage()
+
+
 
             # Remove inactive raindrops
             self.raindrops = [
