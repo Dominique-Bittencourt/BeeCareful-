@@ -7,6 +7,8 @@ from code.Const import (
     SCREEN_HEIGHT,
     MENU_MUSIC,
     GAME_MUSIC,
+    RAIN_SOUND,
+    GAME_OVER_SOUND,
     MAX_LIVES,
 )
 
@@ -19,13 +21,25 @@ from code.Pollen import Pollen
 from code.PollenFactory import PollenFactory
 from code.Cloud import Cloud
 from code.RaindropFactory import RaindropFactory
+from code.GameOverRain import GameOverRain
 
 class Game:
     def __init__(self):
         pygame.init()
 
         pygame.mixer.music.load(MENU_MUSIC)
+        pygame.mixer.music.set_volume(0.5)
         pygame.mixer.music.play(-1)
+
+        self.rain_sound = pygame.mixer.Sound(
+            RAIN_SOUND
+        )
+
+        self.rain_sound.set_volume(1.0)
+
+        self.game_over_sound = pygame.mixer.Sound(
+            GAME_OVER_SOUND
+        )
 
         self.screen = pygame.display.set_mode(
             size=(SCREEN_WIDTH, SCREEN_HEIGHT)
@@ -40,6 +54,9 @@ class Game:
 
         self.menu = Menu(self.screen)
         self.background = Background(self.screen)
+        self.game_over_rain = GameOverRain(
+            self.screen
+        )
 
         # Life HUD
         self.heart = pygame.image.load(
@@ -161,10 +178,18 @@ class Game:
 
     def change_music(self):
         pygame.mixer.music.load(GAME_MUSIC)
+        pygame.mixer.music.set_volume(0.5)
         pygame.mixer.music.play(-1)
 
+        self.rain_sound.play(-1)
+
     def update(self, dt):
-        if self.menu.state == GameState.PLAYING:
+        if self.menu.state == GameState.MENU:
+
+            if self.menu.update():
+                self.restart_game()
+
+        elif self.menu.state == GameState.PLAYING:
 
             self.bee.move()
             self.bee.update(dt)
@@ -269,6 +294,9 @@ class Game:
 
             self.checkGameOver()
 
+        elif self.menu.state == GameState.GAME_OVER:
+            self.game_over_rain.update(dt)
+
     def draw_lives(self):
         for i in range(self.bee.lives):
             heart_rect = self.heart.get_rect(
@@ -296,6 +324,8 @@ class Game:
             overlay,
             (0, 0)
         )
+
+        self.game_over_rain.draw()
 
         # Title shadow
         title_shadow = self.game_over_font.render(
@@ -425,17 +455,23 @@ class Game:
                 self.running = False
 
             elif self.menu.state == GameState.MENU:
-                if self.menu.startGame(event):
-                    self.change_music()
+                self.menu.startGame(event)
 
             elif self.menu.state == GameState.GAME_OVER:
 
                 if event.type == pygame.KEYDOWN:
 
-                    if event.key == pygame.K_RETURN:
+                    if event.key in (pygame.K_RETURN, pygame.K_KP_ENTER):
                         self.restart_game()
 
                     elif event.key == pygame.K_ESCAPE:
+                        self.rain_sound.stop()
+                        self.game_over_sound.stop()
+
+                        pygame.mixer.music.set_volume(0.5)
+                        pygame.mixer.music.load(MENU_MUSIC)
+                        pygame.mixer.music.play(-1)
+
                         self.menu.state = GameState.MENU
 
     def checkVictory(self, ):
@@ -443,6 +479,10 @@ class Game:
 
     def checkGameOver(self):
         if self.bee.lives <= 0:
+            pygame.mixer.music.stop()
+
+            self.game_over_sound.play()
+
             self.menu.state = GameState.GAME_OVER
 
     def restart_game(self):
@@ -472,8 +512,18 @@ class Game:
         self.background.ground_x = 0
         self.background.mountain_x = 0
 
+        for flower in self.flowers:
+            flower.world_x = flower.initial_world_x
+            flower.update_position(
+                self.background.ground_x
+            )
+
         self.menu.state = GameState.PLAYING
 
         pygame.mixer.music.load(GAME_MUSIC)
+        pygame.mixer.music.set_volume(0.5)
         pygame.mixer.music.play(-1)
+
+        self.rain_sound.play(-1)
+        self.game_over_sound.stop()
 

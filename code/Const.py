@@ -3,5 +3,8 @@ SCREEN_HEIGHT = 400
 GROUND_Y = 320
 BEE_MIN_Y = 150
 MAX_LIVES = 3
+
 MENU_MUSIC = './asset/Galaxy Productions -Voyager cut.wav'
 GAME_MUSIC = './asset/Galaxy-Productions-Voyager.wav'
+RAIN_SOUND = './asset/253080__gammascorpii__heavy-rain-stopping-05.flac'
+GAME_OVER_SOUND = './asset/540796__univ_lyon3__fressard_lea_2020_2021_game-over.wav'

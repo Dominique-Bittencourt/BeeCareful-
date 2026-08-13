@@ -18,6 +18,7 @@ class Flower:
         )
 
         self.world_x = self.rect.x
+        self.initial_world_x = self.world_x
 
     def draw(self):
         self.screen.blit(

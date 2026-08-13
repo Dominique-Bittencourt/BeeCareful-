@@ -30,6 +30,8 @@ class Bee:
             './asset/bee.png'
         ).convert_alpha()
 
+        self.facing_right = True
+
         self.rect = self.image.get_rect(
             center=(self.x, self.y)
         )
@@ -39,9 +41,11 @@ class Bee:
 
         if keys[pygame.K_a] or keys[pygame.K_LEFT]:
             self.x -= self.speed
+            self.facing_right = False
 
         if keys[pygame.K_d] or keys[pygame.K_RIGHT]:
             self.x += self.speed
+            self.facing_right = True
 
         if keys[pygame.K_w] or keys[pygame.K_UP]:
             self.y -= self.speed
@@ -74,6 +78,8 @@ class Bee:
         )
 
     def draw(self):
+        self.rect.center = (self.x, self.y)
+
         # Blink while invulnerable
         if self.invulnerability_time > 0:
             blink = pygame.time.get_ticks() // 100
@@ -81,8 +87,15 @@ class Bee:
             if blink % 2 == 0:
                 return
 
-        self.screen.blit(
+        # Flip bee according to direction
+        image = pygame.transform.flip(
             self.image,
+            not self.facing_right,
+            False
+        )
+
+        self.screen.blit(
+            image,
             self.rect
         )
 

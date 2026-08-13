@@ -89,6 +89,9 @@ class Menu:
 
         # Button
         self.button_rect = pygame.Rect(230, 180, 140, 48)
+        self.button_hover = False
+        self.button_pressed = False
+        self.button_press_time = 0
 
     def draw_text_with_shadow(self, text, font, position, color):
         shadow = font.render(
@@ -227,9 +230,25 @@ class Menu:
             self.text_color
         )
 
+        # Button hover
+        mouse_position = pygame.mouse.get_pos()
+
+        self.button_hover = self.button_rect.collidepoint(
+            mouse_position
+        )
+
         # Button JOGAR
+        if self.button_pressed:
+            button_rect = self.button_rect.move(0, 3)
+
+        elif self.button_hover:
+            button_rect = self.button_rect.move(0, -2)
+
+        else:
+            button_rect = self.button_rect
+
         # Shadow
-        shadow_rect = self.button_rect.move(4, 4)
+        shadow_rect = button_rect.move(4, 4)
 
         pygame.draw.rect(
             self.screen,
@@ -241,11 +260,11 @@ class Menu:
         pygame.draw.rect(
             self.screen,
             self.shadow_color,
-            self.button_rect
+            button_rect
         )
 
         # Yellow interior
-        button_inner = self.button_rect.inflate(-4, -4)
+        button_inner = button_rect.inflate(-4, -4)
 
         pygame.draw.rect(
             self.screen,
@@ -261,7 +280,7 @@ class Menu:
         )
 
         button_text_rect = button_text.get_rect(
-            center=self.button_rect.center
+            center=button_rect.center
         )
 
         self.screen.blit(
@@ -307,8 +326,8 @@ class Menu:
     def startGame(self, event):
         if event.type == pygame.MOUSEBUTTONDOWN:
             if self.button_rect.collidepoint(event.pos):
-                self.state = GameState.PLAYING
-                return True
+                self.button_pressed = True
+                self.button_press_time = pygame.time.get_ticks()
 
         return False
 
@@ -317,3 +336,15 @@ class Menu:
 
     def changeState(self, ):
         pass
+
+    def update(self):
+        if self.button_pressed:
+
+            current_time = pygame.time.get_ticks()
+
+            if current_time - self.button_press_time >= 400:
+                self.button_pressed = False
+                self.state = GameState.PLAYING
+                return True
+
+        return False
