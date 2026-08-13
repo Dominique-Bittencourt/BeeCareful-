@@ -10,6 +10,7 @@ from code.Const import (
     RAIN_SOUND,
     GAME_OVER_SOUND,
     MAX_LIVES,
+    POLLEN_GOAL,
 )
 
 from code.Menu import Menu
