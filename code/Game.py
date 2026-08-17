@@ -50,8 +50,13 @@ class Game:
         self.clock = pygame.time.Clock()
 
         self.running = True
-        self.score = None
-        self.timer = None
+
+        def restart_game(self):
+            self.pollen_count = 0
+
+            self.bee.lives = MAX_LIVES
+            self.bee.x = 300
+            self.bee.y = 280
 
         self.menu = Menu(self.screen)
         self.background = Background(self.screen)
@@ -263,6 +268,7 @@ class Game:
 
                     if self.bee.collide(pollen):
                         pollen.collect()
+                        self.pollen_count += 1
                         self.pollen_cooldowns[pollen.flower] = 2.0
 
                     elif pollen.rect.bottom < 0:
@@ -308,6 +314,22 @@ class Game:
                 self.heart,
                 heart_rect
             )
+
+    def draw_pollen_count(self):
+        pollen_text = self.game_over_text_font.render(
+            f"Pólen: {self.pollen_count}/{POLLEN_GOAL}",
+            True,
+            self.game_over_text_color
+        )
+
+        pollen_rect = pollen_text.get_rect(
+            topright = (SCREEN_WIDTH - 20, 15)
+        )
+
+        self.screen.blit(
+            pollen_text,
+            pollen_rect
+        )
 
     def draw_game_over(self):
         # Background
@@ -442,6 +464,7 @@ class Game:
 
             self.bee.draw()
             self.draw_lives()
+            self.draw_pollen_count()
 
         elif self.menu.state == GameState.GAME_OVER:
             self.draw_game_over()
