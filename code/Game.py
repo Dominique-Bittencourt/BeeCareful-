@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 import pygame
 import math
+import random
 
 from code.Const import (
     SCREEN_WIDTH,
@@ -13,6 +14,7 @@ from code.Const import (
     MAX_LIVES,
     POLLEN_GOAL,
     GAME_TIME,
+    VICTORY_SOUND
 )
 
 from code.Menu import Menu
@@ -42,6 +44,10 @@ class Game:
 
         self.game_over_sound = pygame.mixer.Sound(
             GAME_OVER_SOUND
+        )
+
+        self.victory_sound = pygame.mixer.Sound(
+            VICTORY_SOUND
         )
 
         self.screen = pygame.display.set_mode(
@@ -140,6 +146,23 @@ class Game:
         ]
 
         self.bee = Bee(self.screen)
+
+        self.bee_victory = pygame.image.load(
+            './asset/beevictory.png'
+        ).convert_alpha()
+
+        self.pollen_victory = pygame.image.load(
+            './asset/pollen.png'
+        ).convert_alpha()
+
+        self.victory_bees = [
+            (70, 90),
+            (180, 315),
+            (300, 75),
+            (420, 315),
+            (530, 90),
+        ]
+        self.victory_pollens = []
 
         self.pollens = []
         self.pollen_cooldowns = {}
@@ -302,6 +325,9 @@ class Game:
                         )
             self.checkVictory()
             self.checkGameOver()
+
+        elif self.menu.state == GameState.VICTORY:
+            self.update_victory_pollens(dt)
 
         elif self.menu.state == GameState.GAME_OVER:
             self.game_over_rain.update(dt)
@@ -478,16 +504,45 @@ class Game:
             (0, 0)
         )
 
+        # Victory pollen
+        for pollen in self.victory_pollens:
+            pollen_rect = self.pollen_victory.get_rect(
+                center=(
+                    int(pollen["x"]),
+                    int(pollen["y"])
+                )
+            )
+
+            self.screen.blit(
+                self.pollen_victory,
+                pollen_rect
+            )
+
+        # Victory bees
+        time = pygame.time.get_ticks() / 1000
+
+        for i, (x, y) in enumerate(self.victory_bees):
+            bee_y = y + math.sin(time * 4 + i) * 6
+
+            bee_rect = self.bee_victory.get_rect(
+                center=(x, bee_y)
+            )
+
+            self.screen.blit(
+                self.bee_victory,
+                bee_rect
+            )
+
         # Title shadow
         title_shadow = self.game_over_font.render(
-            "YOU WIN!",
+            "VOCÊ GANHOU!",
             True,
             self.game_over_shadow
         )
 
         # Title
         title = self.game_over_font.render(
-            "YOU WIN!",
+            "VOCÊ GANHOU!",
             True,
             (255, 220, 90)
         )
@@ -605,7 +660,6 @@ class Game:
 
         pygame.display.flip()
 
-
     def events(self):
         for event in pygame.event.get():
 
@@ -632,12 +686,44 @@ class Game:
 
                         self.menu.state = GameState.MENU
 
+            elif self.menu.state == GameState.VICTORY:
+
+                if event.type == pygame.KEYDOWN:
+
+                    if event.key in (pygame.K_RETURN, pygame.K_KP_ENTER):
+                        self.restart_game()
+
+                    elif event.key == pygame.K_ESCAPE:
+                        pygame.mixer.music.load(MENU_MUSIC)
+                        pygame.mixer.music.set_volume(0.5)
+                        pygame.mixer.music.play(-1)
+
+                        self.menu.state = GameState.MENU
+
     def checkVictory(self):
         if self.pollen_count >= POLLEN_GOAL:
             pygame.mixer.music.stop()
             self.rain_sound.stop()
+            self.victory_sound.play()
+            self.victory_pollens = []
+
+            for _ in range(30):
+                self.victory_pollens.append({
+                    "x": SCREEN_WIDTH // 2,
+                    "y": 180,
+                    "vx": random.uniform(-150, 150),
+                    "vy": random.uniform(-180, -80)
+                })
 
             self.menu.state = GameState.VICTORY
+
+    def update_victory_pollens(self, dt):
+        for pollen in self.victory_pollens:
+            pollen["x"] += pollen["vx"] * dt
+            pollen["y"] += pollen["vy"] * dt
+
+            # Gravity
+            pollen["vy"] += 300 * dt
 
     def checkGameOver(self):
         if self.bee.lives <= 0:
