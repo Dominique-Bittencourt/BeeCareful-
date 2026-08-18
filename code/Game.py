@@ -39,8 +39,8 @@ class Game:
         self.rain_sound = pygame.mixer.Sound(
             RAIN_SOUND
         )
-
         self.rain_sound.set_volume(1.0)
+        self.rain_channel = None
 
         self.game_over_sound = pygame.mixer.Sound(
             GAME_OVER_SOUND
@@ -60,6 +60,7 @@ class Game:
         self.running = True
         self.pollen_count = 0
         self.time_left = GAME_TIME
+        self.game_over_reason = None
 
         self.menu = Menu(self.screen)
         self.background = Background(self.screen)
@@ -207,7 +208,7 @@ class Game:
         pygame.mixer.music.set_volume(0.5)
         pygame.mixer.music.play(-1)
 
-        self.rain_sound.play(-1)
+        self.rain_channel = self.rain_sound.play(-1)
 
     def update(self, dt):
         if self.menu.state == GameState.MENU:
@@ -425,8 +426,13 @@ class Game:
         )
 
         # Message
+        if self.game_over_reason == "time":
+            message_text = "O tempo acabou antes de você coletar todo o pólen!"
+        else:
+            message_text = "Que pena! A chuva foi demais..."
+
         message = self.game_over_text_font.render(
-            "Que pena! A chuva foi demais...",
+            message_text,
             True,
             self.game_over_text_color
         )
@@ -655,6 +661,33 @@ class Game:
         elif self.menu.state == GameState.GAME_OVER:
             self.draw_game_over()
 
+
+        elif self.menu.state == GameState.PAUSED:
+
+            self.background.draw()
+
+            for cloud in self.clouds:
+                cloud.draw()
+
+            for raindrop in self.raindrops:
+                raindrop.draw()
+
+            for flower in self.flowers:
+                flower.draw()
+
+            for pollen in self.pollens:
+                pollen.draw()
+
+            self.bee.draw()
+
+            self.draw_lives()
+
+            self.draw_pollen_count()
+
+            self.draw_timer()
+
+            self.draw_pause()
+
         elif self.menu.state == GameState.VICTORY:
             self.draw_victory()
 
@@ -668,6 +701,33 @@ class Game:
 
             elif self.menu.state == GameState.MENU:
                 self.menu.startGame(event)
+
+
+
+            elif self.menu.state == GameState.PLAYING:
+
+                if event.type == pygame.KEYDOWN:
+
+                    if event.key == pygame.K_ESCAPE:
+                        pygame.mixer.music.pause()
+
+                        if self.rain_channel:
+                            self.rain_channel.pause()
+
+                        self.menu.state = GameState.PAUSED
+
+
+            elif self.menu.state == GameState.PAUSED:
+
+                if event.type == pygame.KEYDOWN:
+
+                    if event.key == pygame.K_ESCAPE:
+                        pygame.mixer.music.unpause()
+
+                        if self.rain_channel:
+                            self.rain_channel.unpause()
+
+                        self.menu.state = GameState.PLAYING
 
             elif self.menu.state == GameState.GAME_OVER:
 
@@ -727,15 +787,84 @@ class Game:
 
     def checkGameOver(self):
         if self.bee.lives <= 0:
-            pygame.mixer.music.stop()
+            self.game_over_reason = "rain"
 
-            self.game_over_sound.play()
+        elif self.time_left <= 0:
+            self.game_over_reason = "time"
 
-            self.menu.state = GameState.GAME_OVER
+        else:
+            return
+
+        pygame.mixer.music.stop()
+        self.game_over_sound.play()
+
+        self.menu.state = GameState.GAME_OVER
+
+    def draw_pause(self):
+        # Dark overlay
+        overlay = pygame.Surface(
+            (SCREEN_WIDTH, SCREEN_HEIGHT),
+            pygame.SRCALPHA
+        )
+
+        overlay.fill((0, 0, 0, 120))
+
+        self.screen.blit(
+            overlay,
+            (0, 0)
+        )
+
+        # Title shadow
+        title_shadow = self.game_over_font.render(
+            "PAUSADO",
+            True,
+            self.game_over_shadow
+        )
+
+        # Title
+        title = self.game_over_font.render(
+            "PAUSADO",
+            True,
+            self.game_over_color
+        )
+
+        title_rect = title.get_rect(
+            center=(300, 140)
+        )
+
+        self.screen.blit(
+            title_shadow,
+            (
+                title_rect.x + 3,
+                title_rect.y + 3
+            )
+        )
+
+        self.screen.blit(
+            title,
+            title_rect
+        )
+
+        # Instruction
+        instruction = self.game_over_text_font.render(
+            "ESC - Continuar",
+            True,
+            self.game_over_text_color
+        )
+
+        instruction_rect = instruction.get_rect(
+            center=(300, 200)
+        )
+
+        self.screen.blit(
+            instruction,
+            instruction_rect
+        )
 
     def restart_game(self):
         self.pollen_count = 0
         self.time_left = GAME_TIME
+        self.game_over_reason = None
 
         self.bee.lives = MAX_LIVES
         self.bee.x = 300
