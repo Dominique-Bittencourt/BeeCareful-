@@ -1,6 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 import pygame
+import math
 
 from code.Const import (
     SCREEN_WIDTH,
@@ -11,6 +12,7 @@ from code.Const import (
     GAME_OVER_SOUND,
     MAX_LIVES,
     POLLEN_GOAL,
+    GAME_TIME,
 )
 
 from code.Menu import Menu
@@ -50,13 +52,8 @@ class Game:
         self.clock = pygame.time.Clock()
 
         self.running = True
-
-        def restart_game(self):
-            self.pollen_count = 0
-
-            self.bee.lives = MAX_LIVES
-            self.bee.x = 300
-            self.bee.y = 280
+        self.pollen_count = 0
+        self.time_left = GAME_TIME
 
         self.menu = Menu(self.screen)
         self.background = Background(self.screen)
@@ -197,6 +194,11 @@ class Game:
 
         elif self.menu.state == GameState.PLAYING:
 
+            self.time_left -= dt
+
+            if self.time_left < 0:
+                self.time_left = 0
+
             self.bee.move()
             self.bee.update(dt)
             self.background.update(dt)
@@ -298,7 +300,7 @@ class Game:
                                 flower
                             )
                         )
-
+            self.checkVictory()
             self.checkGameOver()
 
         elif self.menu.state == GameState.GAME_OVER:
@@ -329,6 +331,22 @@ class Game:
         self.screen.blit(
             pollen_text,
             pollen_rect
+        )
+
+    def draw_timer(self):
+        timer_text = self.game_over_text_font.render(
+            f"Tempo: {math.ceil(self.time_left)}",
+            True,
+            self.game_over_text_color
+        )
+
+        timer_rect = timer_text.get_rect(
+            center=(SCREEN_WIDTH // 2, 25)
+        )
+
+        self.screen.blit(
+            timer_text,
+            timer_rect
         )
 
     def draw_game_over(self):
@@ -443,6 +461,118 @@ class Game:
             menu_rect
         )
 
+    def draw_victory(self):
+        # Background
+        self.background.draw()
+
+        # Dark overlay
+        overlay = pygame.Surface(
+            (SCREEN_WIDTH, SCREEN_HEIGHT),
+            pygame.SRCALPHA
+        )
+
+        overlay.fill((0, 0, 0, 100))
+
+        self.screen.blit(
+            overlay,
+            (0, 0)
+        )
+
+        # Title shadow
+        title_shadow = self.game_over_font.render(
+            "YOU WIN!",
+            True,
+            self.game_over_shadow
+        )
+
+        # Title
+        title = self.game_over_font.render(
+            "YOU WIN!",
+            True,
+            (255, 220, 90)
+        )
+
+        title_rect = title.get_rect(
+            center=(300, 105)
+        )
+
+        self.screen.blit(
+            title_shadow,
+            (
+                title_rect.x + 3,
+                title_rect.y + 3
+            )
+        )
+
+        self.screen.blit(
+            title,
+            title_rect
+        )
+
+        # Message
+        message = self.game_over_text_font.render(
+            "Você conseguiu coletar todo o pólen!",
+            True,
+            self.game_over_text_color
+        )
+
+        message_rect = message.get_rect(
+            center=(300, 165)
+        )
+
+        self.screen.blit(
+            message,
+            message_rect
+        )
+
+        # Pollen count
+        pollen_text = self.game_over_text_font.render(
+            f"Pólen coletado: {self.pollen_count}/{POLLEN_GOAL}",
+            True,
+            self.game_over_text_color
+        )
+
+        pollen_rect = pollen_text.get_rect(
+            center=(300, 195)
+        )
+
+        self.screen.blit(
+            pollen_text,
+            pollen_rect
+        )
+
+        # Restart
+        restart = self.game_over_text_font.render(
+            "ENTER - Jogar novamente",
+            True,
+            self.game_over_text_color
+        )
+
+        restart_rect = restart.get_rect(
+            center=(300, 235)
+        )
+
+        self.screen.blit(
+            restart,
+            restart_rect
+        )
+
+        # Menu
+        menu = self.game_over_text_font.render(
+            "ESC - Voltar ao menu",
+            True,
+            self.game_over_text_color
+        )
+
+        menu_rect = menu.get_rect(
+            center=(300, 265)
+        )
+
+        self.screen.blit(
+            menu,
+            menu_rect
+        )
+
     def draw(self):
         if self.menu.state == GameState.MENU:
             self.menu.draw()
@@ -465,9 +595,13 @@ class Game:
             self.bee.draw()
             self.draw_lives()
             self.draw_pollen_count()
+            self.draw_timer()
 
         elif self.menu.state == GameState.GAME_OVER:
             self.draw_game_over()
+
+        elif self.menu.state == GameState.VICTORY:
+            self.draw_victory()
 
         pygame.display.flip()
 
@@ -498,8 +632,12 @@ class Game:
 
                         self.menu.state = GameState.MENU
 
-    def checkVictory(self, ):
-        pass
+    def checkVictory(self):
+        if self.pollen_count >= POLLEN_GOAL:
+            pygame.mixer.music.stop()
+            self.rain_sound.stop()
+
+            self.menu.state = GameState.VICTORY
 
     def checkGameOver(self):
         if self.bee.lives <= 0:
@@ -510,6 +648,9 @@ class Game:
             self.menu.state = GameState.GAME_OVER
 
     def restart_game(self):
+        self.pollen_count = 0
+        self.time_left = GAME_TIME
+
         self.bee.lives = MAX_LIVES
         self.bee.x = 300
         self.bee.y = 280
