@@ -1,5 +1,3 @@
-#!/usr/bin/python
-# -*- coding: utf-8 -*-
 import math
 import random
 
@@ -68,7 +66,6 @@ class Game:
             self.screen
         )
 
-        # Life HUD
         self.heart = pygame.image.load(
             './asset/heart.png'
         ).convert_alpha()
@@ -203,11 +200,6 @@ class Game:
 
         pygame.quit()
 
-    def change_music(self):
-        pygame.mixer.music.load(GAME_MUSIC)
-        pygame.mixer.music.set_volume(0.5)
-        pygame.mixer.music.play(-1)
-
         self.rain_channel = self.rain_sound.play(-1)
 
     def update(self, dt):
@@ -275,7 +267,7 @@ class Game:
                     raindrop.update(dt)
 
                     if self.bee.collide(raindrop):
-                        raindrop.active= False
+                        raindrop.active = False
                         self.bee.take_damage()
 
 
@@ -352,7 +344,7 @@ class Game:
         )
 
         pollen_rect = pollen_text.get_rect(
-            topright = (SCREEN_WIDTH - 20, 15)
+            topright =(SCREEN_WIDTH - 20, 15)
         )
 
         self.screen.blit(

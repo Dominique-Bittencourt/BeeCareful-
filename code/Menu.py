@@ -4,7 +4,6 @@ import pygame
 
 from code.GameState import GameState
 
-
 class Menu:
     def __init__(self, screen):
         self.screen = screen
@@ -81,10 +80,10 @@ class Menu:
         )
 
         # Colors
-        self.title_color = (255, 220, 90)  # amarelo/mel
-        self.shadow_color = (92, 58, 35)  # marrom
-        self.text_color = (255, 248, 220)  # creme
-        self.text_shadow = (80, 105, 110)  # azul/cinza escuro
+        self.title_color = (255, 220, 90)  # honey yellow
+        self.shadow_color = (92, 58, 35)  # brown
+        self.text_color = (255, 248, 220)  # cream
+        self.text_shadow = (80, 105, 110)  # blue-gray
 
         # Button
         self.button_rect = pygame.Rect(230, 180, 140, 48)
@@ -117,7 +116,7 @@ class Menu:
             rect
         )
 
-    def draw(self, ):
+    def draw(self):
         time = pygame.time.get_ticks() / 1000
 
         # Background
@@ -211,7 +210,6 @@ class Menu:
             (title_rect.x + 3, title_rect.y + 3)
         )
 
-        # Title
         self.screen.blit(title, title_rect)
 
         # Subtitles
@@ -229,7 +227,7 @@ class Menu:
             self.text_color
         )
 
-        # Button hover
+        # Button state
         mouse_position = pygame.mouse.get_pos()
 
         self.button_hover = self.button_rect.collidepoint(
@@ -287,9 +285,7 @@ class Menu:
             button_text_rect
         )
 
-        # Bee
-        # Movement of the bee
-        time = pygame.time.get_ticks() / 1000
+        # Bee movement
 
         bee_y = self.bee_base_y + math.sin(time * 3) * 7
 
