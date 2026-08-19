@@ -1,6 +1,3 @@
-#!/usr/bin/python
-# -*- coding: utf-8 -*-
-
 import pygame
 
 
@@ -64,7 +61,7 @@ class Background:
 
         self.ground_y = self.ground_rect.top
 
-        # Parallax movement
+        # Parallax
         self.mountain_x = 0
         self.ground_x = 0
 

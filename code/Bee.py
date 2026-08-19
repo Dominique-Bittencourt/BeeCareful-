@@ -1,31 +1,29 @@
-#!/usr/bin/python
-# -*- coding: utf-8 -*-
-
 import pygame
 
 from code.Const import (
-SCREEN_WIDTH,
-GROUND_Y,
-BEE_MIN_Y,
-MAX_LIVES
+    SCREEN_WIDTH,
+    GROUND_Y,
+    BEE_MIN_Y,
+    MAX_LIVES
 )
+
 
 class Bee:
     def __init__(self, screen):
         self.screen = screen
 
-        #Bee position
+        # Bee position
         self.x = 300
         self.y = 280
 
-        #Bee movement speed
+        # Bee movement speed
         self.speed = 3
 
-        # Health
+        # Lives and invulnerability
         self.lives = MAX_LIVES
         self.invulnerability_time = 0
 
-        #Bee image
+        # Bee image
         self.image = pygame.image.load(
             './asset/bee.png'
         ).convert_alpha()

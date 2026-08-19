@@ -1,9 +1,4 @@
-#!/usr/bin/python
-
-# -*- coding: utf-8 -*-
-
 from code.Pollen import Pollen
-
 
 class PollenFactory:
 

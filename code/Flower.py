@@ -1,7 +1,3 @@
-#!/usr/bin/python
-
-# -*- coding: utf-8 -*-
-
 import pygame
 
 
@@ -16,7 +12,7 @@ class Flower:
         self.rect = self.image.get_rect(
             center=(x, y)
         )
-
+        # World position
         self.world_x = self.rect.x
         self.initial_world_x = self.world_x
 

@@ -1,16 +1,12 @@
-#!/usr/bin/python
-
-# -*- coding: utf-8 -*-
-
 import math
-import pygame
 
+import pygame
 
 class Pollen:
     def __init__(self, screen, x, y, flower):
         self.screen = screen
 
-        #Pollen origin
+        # Pollen origin
         self.flower = flower
 
         # Pollen position

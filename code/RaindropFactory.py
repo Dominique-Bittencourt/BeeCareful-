@@ -1,7 +1,3 @@
-#!/usr/bin/python
-
-# -*- coding: utf-8 -*-
-
 from code.Raindrop import Raindrop
 
 
@@ -17,3 +13,4 @@ class RaindropFactory:
             y,
             cloud
         )
+

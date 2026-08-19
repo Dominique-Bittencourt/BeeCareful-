@@ -1,9 +1,13 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-import pygame
 import math
 import random
 
+import pygame
+
+from code.Background import Background
+from code.Bee import Bee
+from code.Cloud import Cloud
 from code.Const import (
     SCREEN_WIDTH,
     SCREEN_HEIGHT,
@@ -16,17 +20,13 @@ from code.Const import (
     GAME_TIME,
     VICTORY_SOUND
 )
-
-from code.Menu import Menu
-from code.GameState import GameState
-from code.Background import Background
 from code.Flower import Flower
-from code.Bee import Bee
-from code.Pollen import Pollen
-from code.PollenFactory import PollenFactory
-from code.Cloud import Cloud
-from code.RaindropFactory import RaindropFactory
 from code.GameOverRain import GameOverRain
+from code.GameState import GameState
+from code.Menu import Menu
+from code.PollenFactory import PollenFactory
+from code.RaindropFactory import RaindropFactory
+
 
 class Game:
     def __init__(self):

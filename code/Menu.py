@@ -1,10 +1,9 @@
-#!/usr/bin/python
-# -*- coding: utf-8 -*-
-
-import pygame
 import math
 
+import pygame
+
 from code.GameState import GameState
+
 
 class Menu:
     def __init__(self, screen):
@@ -330,12 +329,6 @@ class Menu:
                 self.button_press_time = pygame.time.get_ticks()
 
         return False
-
-    def exitGame(self, ):
-        pass
-
-    def changeState(self, ):
-        pass
 
     def update(self):
         if self.button_pressed:
